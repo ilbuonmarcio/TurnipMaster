@@ -71,10 +71,14 @@ class Island():
     def __str__(self):
         return f"[c:{self.code}][t:{self.optype}][p:{self.bell_price}][q:{self.queue_length}][r:{self.ratio}]"
 
+    def __gt__(self, other):
+        return self.ratio > other.ratio
+
 
 if __name__ == "__main__":
     tex = TurnipExchange()
-    islands = tex.get_islands()    
+    islands = tex.get_islands()
+    islands.sort(reverse=True)
 
     [print(island) for island in islands]
 
