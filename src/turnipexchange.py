@@ -37,7 +37,7 @@ class TurnipExchange():
 
             code = island_note['data-turnip-code']
             name = island_top_note[0].findChild('h2').contents[0].strip()
-            optype = 'buy' if datetime.datetime.now().weekday() else 'sell'
+            optype = 'buy' if datetime.datetime.now().weekday() == 6 else 'sell'
             fruit = island_top_note[1].findChild('img', recursive=False)['src'].split('/')[-1:][0].replace('.png', '')
             tmp_element = island_top_note[1].findChild('div', {'class': 'flex'}, recursive=False)
             bell_price = tmp_element.findChild('p').contents[0].replace(' Bells', '')
