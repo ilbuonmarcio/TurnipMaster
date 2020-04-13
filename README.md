@@ -3,10 +3,11 @@ Never dreamed of being a bellionaire in Animal Crossing New Horizons?
 
 TurnipMaster is a command-line application that help you find the perfect island for buying and selling turnips.
 
-Just type your username, and let the application do the rest!
+Just type your username, and let the application do the rest!it st
 
 ## Installation
 
+- Install `firefox` and add `geckodriver` to your system path
 - Install `python3.7` or higher
 - Install `pip3`
 - Install virtualenv via pip3
