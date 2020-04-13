@@ -1,6 +1,7 @@
 import time
 import datetime
 from selenium import webdriver
+from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -9,14 +10,22 @@ from bs4 import BeautifulSoup
 
 class TurnipExchange():
     def __init__(self):
-        self.driver = webdriver.Firefox()
+        pass
+
+    def __get_driver(self):
+        options = Options()
+        options.headless = True
+        driver = webdriver.Firefox(options=options)
+        return driver
 
     def get_islands(self):
-        self.driver.get("https://turnip.exchange/islands")
-        WebDriverWait(self.driver, 10).until(
+        driver = self.__get_driver()
+        driver.get("https://turnip.exchange/islands")
+        WebDriverWait(driver, 10).until(
             EC.visibility_of_any_elements_located((By.CLASS_NAME, "note"))
         )
-        page_source = self.driver.page_source
+        page_source = driver.page_source
+        driver.close()
 
         soup = BeautifulSoup(page_source, 'html.parser')
         islands_available = soup.find_all('div', {'class': 'note'})
