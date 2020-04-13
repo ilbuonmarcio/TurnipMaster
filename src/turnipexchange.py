@@ -15,7 +15,7 @@ class TurnipExchange():
 
     def __get_driver(self, headless=True):
         options = Options()
-        options.headless = True
+        options.headless = headless
         driver = webdriver.Firefox(options=options)
         return driver
 
@@ -61,9 +61,28 @@ class TurnipExchange():
 
         return islands
 
-    def open_island(self, code):
+    def open_island(self, code, name):
         driver = self.__get_driver(headless=False)
         driver.get(f"https://turnip.exchange/island/{code}")
+
+        # Wait for alert show up
+        WebDriverWait(driver, 10).until(
+            EC.visibility_of_any_elements_located((By.CLASS_NAME, "text-info-foreground"))
+        )
+        driver.find_element_by_class_name('text-info-foreground').click()
+
+        # Wait for join queue button
+        WebDriverWait(driver, 10).until(
+            EC.visibility_of_any_elements_located((By.XPATH, "/html/body/div/div[2]/div[4]/div/button"))
+        )
+        driver.find_element_by_xpath("/html/body/div/div[2]/div[4]/div/button").click()
+
+        # Wait for name insertion
+        WebDriverWait(driver, 10).until(
+            EC.visibility_of_any_elements_located((By.XPATH, "/html/body/div/div[2]/div[2]/div/input"))
+        )
+        input_field = driver.find_element_by_xpath("/html/body/div/div[2]/div[2]/div/input").send_keys(name)
+        driver.find_element_by_xpath("/html/body/div/div[2]/div[2]/div/div/button[2]").click()
 
 
 class Island():
@@ -208,7 +227,16 @@ if __name__ == "__main__":
 
     islands = islands_filter.build(islands)
 
+    name = args.name
     mode = 'buy' if datetime.datetime.now().weekday() == 6 else 'sell'
+    log(f"USER: {name}")
     log(f"MODE: {mode}")
-    [log(island) for island in islands]
+    if len(islands) > 0:
+        [log(island) for island in islands]
+        log("Opening the first island based on price...")
+        tex.open_island(islands[0].code, name)
+    else:
+        log("There are no islands available for these filters, exiting.")
+        exit(0)
+
 
