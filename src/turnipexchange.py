@@ -20,7 +20,7 @@ class TurnipExchange():
         return driver
 
     def get_islands(self):
-        print("Getting islands page...")
+        log("Getting islands page...")
         driver = self.__get_driver()
         driver.get("https://turnip.exchange/islands")
         WebDriverWait(driver, 10).until(
@@ -29,7 +29,7 @@ class TurnipExchange():
         page_source = driver.page_source
         driver.close()
 
-        print("Parsing page...")
+        log("Parsing page...")
         soup = BeautifulSoup(page_source, 'html.parser')
         islands_available = soup.find_all('div', {'class': 'note'})
 
@@ -40,7 +40,6 @@ class TurnipExchange():
 
             code = island_note['data-turnip-code']
             name = island_top_note[0].findChild('h2').contents[0].strip()
-            optype = 'buy' if datetime.datetime.now().weekday() == 6 else 'sell'
             fruit = island_top_note[1].findChild('img', recursive=False)['src'].split('/')[-1:][0].replace('.png', '')
             tmp_element = island_top_note[1].findChild('div', {'class': 'flex'}, recursive=False)
             bell_price = tmp_element.findChild('p').contents[0].replace(' Bells', '')
@@ -52,7 +51,6 @@ class TurnipExchange():
                 Island(
                     code,
                     name,
-                    optype,
                     fruit,
                     bell_price,
                     emisphere,
@@ -69,23 +67,20 @@ class TurnipExchange():
 
 
 class Island():
-    def __init__(self, code, name, optype, fruit, bell_price, emisphere, description, queue_length):
+    def __init__(self, code, name, fruit, bell_price, emisphere, description, queue_length):
         self.code = code
         self.name = name
-        self.optype = optype
         self.fruit = fruit
-        self.bell_price = float(bell_price)
+        self.bell_price = int(bell_price)
         self.emisphere = emisphere
         self.description = description
-        self.queue_length = float(queue_length)
-
-        if self.queue_length == 0:
-            self.ratio = float("inf")
-        else:
-            self.ratio = self.bell_price / self.queue_length
+        self.queue_length = int(queue_length)
 
     def __str__(self):
-        return f"[c:{self.code}][t:{self.optype}][p:{self.bell_price}][q:{self.queue_length}][r:{self.ratio}]"
+        return f"[code:{self.code}][price:{self.bell_price}][queue:{self.queue_length}]"
+
+    def __gt__(self, other):
+        return self.bell_price > other.bell_price
 
 
 class IslandsFilter():
@@ -98,7 +93,7 @@ class IslandsFilter():
         self.__filter_emisphere = None
 
     def apply_filter(self, filter, value):
-        print(f"Applying filter {filter}...")
+        log(f"Applying filter {filter}...")
         if filter == 'min_queue_length':
             if isinstance(value, int) and\
                 value >= 0 and value <= float("inf") and\
@@ -149,35 +144,42 @@ class IslandsFilter():
         else:
             raise Exception(f"Invalid filter name: {filter}")
 
-        print(f"Added filter {filter} with value {value} successfully")
 
     def build(self, islands):
-        print(f"Filtering by queue length ({len(islands)}) [{self.__filter_min_queue_length} <-> {self.__filter_max_queue_length}]")
+        log(f"Filtering by queue length ({len(islands)}) [{self.__filter_min_queue_length} <-> {self.__filter_max_queue_length}]")
         islands = list(filter(
             lambda island: island.queue_length >= self.__filter_min_queue_length and island.queue_length <= self.__filter_max_queue_length, islands
         ))
 
-        print(f"Filtering by bells price ({len(islands)}) [{self.__filter_min_bells} <-> {self.__filter_max_bells}]")
+        log(f"Filtering by turnips price ({len(islands)}) [{self.__filter_min_bells} <-> {self.__filter_max_bells}]")
         islands = list(filter(
             lambda island: island.bell_price >= self.__filter_min_bells and island.bell_price <= self.__filter_max_bells, islands
         ))
 
-        print(f"Ignoring fruit ({len(islands)}) [{self.__filter_ignore_fruit}]")
+        log(f"Ignoring fruit ({len(islands)}) [{self.__filter_ignore_fruit}]")
         islands = list(filter(
             lambda island: island.fruit != self.__filter_ignore_fruit, islands
         ))
 
-        print(f"Filtering by emisphere ({len(islands)}) [{self.__filter_emisphere}]")
+        log(f"Filtering by emisphere ({len(islands)}) [{self.__filter_emisphere}]")
         islands = list(filter(
             lambda island: self.__filter_emisphere is None or island.emisphere == self.__filter_emisphere, islands
         ))
 
-        print(f"Islands after filters: {len(islands)}")
+        log(f"Islands after filters: {len(islands)}")
+        log(f"Sorting islands by turnips price...")
+        islands.sort(reverse=True)
+
         return islands
+
+
+def log(string):
+    print(datetime.datetime.now().strftime("[%Y-%m-%d %H:%m:%S]"), string)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
+    parser.add_argument('--name', type=str, required=True, help="Set the username of the profile visiting the island")
     parser.add_argument('--min-queue-length', type=int, help="Set the minimum queue lenght (default: 0)")
     parser.add_argument('--max-queue-length', type=int, help="Set the maximum queue lenght (default: inf)")
     parser.add_argument('--min-bells', type=int, help="Set the minimum bells for turnip (default: 0)")
@@ -206,8 +208,7 @@ if __name__ == "__main__":
 
     islands = islands_filter.build(islands)
 
-    [print(island) for island in islands]
+    mode = 'buy' if datetime.datetime.now().weekday() == 6 else 'sell'
+    log(f"MODE: {mode}")
+    [log(island) for island in islands]
 
-
-
-    
