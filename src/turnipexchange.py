@@ -1,5 +1,6 @@
 import time
 import datetime
+import argparse
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.common.by import By
@@ -148,7 +149,7 @@ class IslandsFilter():
         else:
             raise Exception(f"Invalid filter name: {filter}")
 
-        print(f"Added filter {filter} with value {value}")
+        print(f"Added filter {filter} with value {value} successfully")
 
     def build(self, islands):
         print(f"Filtering by queue length ({len(islands)}) [{self.__filter_min_queue_length} <-> {self.__filter_max_queue_length}]")
@@ -176,17 +177,33 @@ class IslandsFilter():
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--min-queue-length', type=int, help="Set the minimum queue lenght (default: 0)")
+    parser.add_argument('--max-queue-length', type=int, help="Set the maximum queue lenght (default: inf)")
+    parser.add_argument('--min-bells', type=int, help="Set the minimum bells for turnip (default: 0)")
+    parser.add_argument('--max-bells', type=int, help="Set the maximum bells for turnip (default: inf)")
+    parser.add_argument('--ignore-fruit', type=str, help="Set the fruit to ignore (default: none) [avail: peach, pear, apple, cherry, orange]")
+    parser.add_argument('--emisphere', type=str, help="Set the emisphere (default: none) [avail: north, south]")
+
+    args = parser.parse_args()
+
     islands_filter = IslandsFilter()
-    # islands_filter.apply_filter('max_queue_length', 50)
-    # islands_filter.apply_filter('min_queue_length', 15)
-    # islands_filter.apply_filter('min_bells', 0)
-    # islands_filter.apply_filter('max_bells', 120)
-    # islands_filter.apply_filter('ignore_fruit', 'apple')
-    # islands_filter.apply_filter('emisphere', 'south')
+    if args.min_queue_length is not None:
+        islands_filter.apply_filter('min_queue_length', args.min_queue_length)
+    if args.max_queue_length is not None:
+        islands_filter.apply_filter('max_queue_length', args.max_queue_length)
+    if args.min_bells is not None:
+        islands_filter.apply_filter('min_bells', args.min_bells)
+    if args.max_bells is not None:
+        islands_filter.apply_filter('max_bells', args.max_bells)
+    if args.ignore_fruit is not None:
+        islands_filter.apply_filter('ignore_fruit', args.ignore_fruit)
+    if args.emisphere is not None:
+        islands_filter.apply_filter('emisphere', args.emisphere)
 
     tex = TurnipExchange()
     islands = tex.get_islands()
-    
+
     islands = islands_filter.build(islands)
 
     [print(island) for island in islands]
