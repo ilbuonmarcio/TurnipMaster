@@ -110,6 +110,7 @@ class IslandsFilter():
         self.__filter_max_bells = float("inf")
         self.__filter_ignore_fruit = None
         self.__filter_emisphere = None
+        self.__filter_skip = 0
 
     def apply_filter(self, filter, value):
         log(f"Applying filter {filter}...")
@@ -160,6 +161,12 @@ class IslandsFilter():
             else:
                 raise Exception(f"Invalid emisphere value: {value}")
 
+        elif filter == 'skip':
+            if isinstance(value, int) and value >= 0:
+                self.__filter_skip = value
+            else:
+                raise Exception(f"Invalid skip value: {value}")
+
         else:
             raise Exception(f"Invalid filter name: {filter}")
 
@@ -186,8 +193,11 @@ class IslandsFilter():
         ))
 
         log(f"Islands after filters: {len(islands)}")
-        log(f"Sorting islands by turnips price...")
+        log("Sorting islands by turnips price...")
         islands.sort(reverse=True)
+
+        log(f"Skipping {self.__filter_skip} islands starting from top...")
+        islands = islands[self.__filter_skip:]
 
         return islands
 
@@ -205,6 +215,7 @@ if __name__ == "__main__":
     parser.add_argument('--max-bells', type=int, help="Set the maximum bells for turnip (default: inf)")
     parser.add_argument('--ignore-fruit', type=str, help="Set the fruit to ignore (default: none) [avail: peach, pear, apple, cherry, orange]")
     parser.add_argument('--emisphere', type=str, help="Set the emisphere (default: none) [avail: north, south]")
+    parser.add_argument('--skip', type=int, help="Skip N islands starting from the top ones inclusive (default: 0)")
 
     args = parser.parse_args()
 
@@ -221,6 +232,8 @@ if __name__ == "__main__":
         islands_filter.apply_filter('ignore_fruit', args.ignore_fruit)
     if args.emisphere is not None:
         islands_filter.apply_filter('emisphere', args.emisphere)
+    if args.skip is not None:
+        islands_filter.apply_filter('skip', args.skip)
 
     tex = TurnipExchange()
     islands = tex.get_islands()
