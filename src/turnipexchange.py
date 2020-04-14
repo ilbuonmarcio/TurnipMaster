@@ -45,7 +45,10 @@ class TurnipExchange():
             bell_price = tmp_element.findChild('p').contents[0].replace(' Bells', '')
             emisphere = island_top_note[1].findChild('p', recursive=False).contents[0].strip()
             description = island_bottom_note[0].contents[0].strip()
-            queue_length = island_bottom_note[1].contents[0].strip().replace('Waiting: ', '')
+            tmp_element = island_bottom_note[1].contents[0].strip().replace('Waiting: ', '').split('/')
+            queue_length = tmp_element[0]
+            max_queue_length = tmp_element[1]
+            
 
             islands.append(
                 Island(
@@ -55,7 +58,8 @@ class TurnipExchange():
                     bell_price,
                     emisphere,
                     description,
-                    queue_length
+                    queue_length,
+                    max_queue_length
                 )
             )
 
@@ -86,7 +90,7 @@ class TurnipExchange():
 
 
 class Island():
-    def __init__(self, code, name, fruit, bell_price, emisphere, description, queue_length):
+    def __init__(self, code, name, fruit, bell_price, emisphere, description, queue_length, max_queue_length):
         self.code = code
         self.name = name
         self.fruit = fruit
@@ -94,9 +98,10 @@ class Island():
         self.emisphere = emisphere
         self.description = description
         self.queue_length = int(queue_length)
+        self.max_queue_length = int(max_queue_length)
 
     def __str__(self):
-        return f"[code:{self.code}][price:{self.bell_price}][queue:{self.queue_length}]"
+        return f"[code:{self.code}][price:{self.bell_price}][queue:{self.queue_length}/{self.max_queue_length}]"
 
     def __gt__(self, other):
         return self.bell_price > other.bell_price
