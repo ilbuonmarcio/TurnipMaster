@@ -216,6 +216,7 @@ if __name__ == "__main__":
     parser.add_argument('--ignore-fruit', type=str, help="Set the fruit to ignore (default: none) [avail: peach, pear, apple, cherry, orange]")
     parser.add_argument('--emisphere', type=str, help="Set the emisphere (default: none) [avail: north, south]")
     parser.add_argument('--skip', type=int, help="Skip N islands starting from the top ones inclusive (default: 0)")
+    parser.add_argument('--noopen', action='store_true', help="Set this for not automatically open first island matched by those rules (default: not selected)")
 
     args = parser.parse_args()
 
@@ -242,12 +243,15 @@ if __name__ == "__main__":
 
     name = args.name
     mode = 'buy' if datetime.datetime.now().weekday() == 6 else 'sell'
+    noopen = args.noopen
+
     log(f"USER: {name}")
     log(f"MODE: {mode}")
     if len(islands) > 0:
         [log(island) for island in islands]
-        log("Opening the first island based on price...")
-        tex.open_island(islands[0].code, name)
+        if not noopen:
+            log("Opening the first island based on price...")
+            tex.open_island(islands[0].code, name)
     else:
         log("There are no islands available for these filters, exiting.")
         exit(0)
