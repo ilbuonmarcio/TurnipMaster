@@ -39,7 +39,7 @@ class TurnipExchange():
             island_bottom_note = island_note.findChildren('p', recursive=False)
 
             code = island_note['data-turnip-code']
-            name = island_top_note[0].findChild('h2').contents[0].strip()
+            name = island_top_note[0].findChild('h2').findChild('p').contents[0].strip()
             fruit = island_top_note[1].findChild('img', recursive=False)['src'].split('/')[-1:][0].replace('.png', '')
             tmp_element = island_top_note[1].findChild('div', {'class': 'flex'}, recursive=False)
             bell_price = tmp_element.findChild('p').contents[0].replace(' Bells', '')
