@@ -26,6 +26,11 @@ class TurnipExchange():
         WebDriverWait(driver, 10).until(
             EC.visibility_of_any_elements_located((By.CLASS_NAME, "note"))
         )
+        ####CLICK ALL ISLANDS (Make sure Patreon not clicking)
+        driver.find_element_by_xpath("/html/body/div/div[2]/div[1]/div[3]/div/button[2]").click()
+        WebDriverWait(driver, 10).until(
+            EC.visibility_of_any_elements_located((By.XPATH, "/html/body/div/div[2]/div[1]/div[3]/div/button[2]"))
+        )
         page_source = driver.page_source
         driver.close()
 
@@ -77,9 +82,9 @@ class TurnipExchange():
 
         # Wait for join queue button
         WebDriverWait(driver, 10).until(
-            EC.visibility_of_any_elements_located((By.XPATH, "/html/body/div/div[2]/div[4]/div/button"))
+            EC.visibility_of_any_elements_located((By.XPATH, "//html/body/div/div[2]/div[6]/div/button"))
         )
-        driver.find_element_by_xpath("/html/body/div/div[2]/div[4]/div/button").click()
+        driver.find_element_by_xpath("/html/body/div/div[2]/div[6]/div/button").click()
 
         # Wait for name insertion
         WebDriverWait(driver, 10).until(
@@ -260,5 +265,3 @@ if __name__ == "__main__":
     else:
         log("There are no islands available for these filters, exiting.")
         exit(0)
-
-
